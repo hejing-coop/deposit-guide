@@ -4,6 +4,8 @@
  */
 
 import React, { useState } from 'react';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { 
   Monitor, 
   Smartphone, 
@@ -17,6 +19,13 @@ import {
   UploadCloud,
   ArrowRightLeft
 } from 'lucide-react';
+
+/**
+ * Utility to merge tailwind classes
+ */
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
 
 // Color Palette
 const colors = {
@@ -43,32 +52,61 @@ export default function App() {
     </div>
   );
 
-  const StepCard = ({ number, title, content, imageDesc }: { number: number, title: string, content: string[], imageDesc: string }) => (
-    <div className="rounded-2xl overflow-hidden shadow-2xl border border-slate-800 mb-10 transition-all hover:border-slate-700" style={{ backgroundColor: colors.card }}>
-      <div className="p-6 flex flex-col md:flex-row gap-8">
-        <div className="flex-1 space-y-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-full flex items-center justify-center text-slate-900 font-bold" style={{ backgroundColor: colors.gold }}>
-              {number}
-            </span>
-            <h3 className="text-xl font-bold text-white">{title}</h3>
+  const StepCard = ({ number, title, content, imageDesc, imageUrl, isMobile }: { number: number, title: string, content: string[], imageDesc: string, imageUrl?: string, isMobile?: boolean }) => (
+    <div className={cn(
+      "rounded-[3rem] border border-slate-800 overflow-hidden shadow-2xl flex flex-col mb-16",
+      isMobile ? "md:flex-row items-stretch" : "items-stretch"
+    )} style={{ backgroundColor: colors.card }}>
+      {/* Text Content Area */}
+      <div className={cn(
+        "p-10 md:p-16 flex flex-col justify-center space-y-8",
+        isMobile ? "md:w-1/2" : "w-full"
+      )}>
+        <div className="flex items-center gap-6">
+          <div className="w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-slate-900 font-black text-2xl shadow-[0_0_20px_rgba(212,175,55,0.3)] shrink-0" style={{ backgroundColor: colors.gold }}>
+            {number}
           </div>
-          <ul className="space-y-3">
-            {content.map((item, i) => (
-              <li key={i} className="flex items-start gap-2" style={{ color: colors.secondaryText }}>
-                <ChevronRight className="w-4 h-4 mt-1 shrink-0" style={{ color: colors.gold }} />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          <h3 className="text-3xl font-bold text-white tracking-tight">{title}</h3>
         </div>
-        <div className="flex-1 bg-slate-900/50 rounded-xl min-h-[200px] flex items-center justify-center border border-slate-800 relative group overflow-hidden">
-          {/* Placeholder for images from PDF */}
-          <div className="text-center p-4">
-            <p className="text-[10px] font-mono uppercase tracking-widest mb-2" style={{ color: colors.gold }}>Screenshot Reference</p>
-            <p className="text-sm font-medium text-slate-400">{imageDesc}</p>
-          </div>
-          <div className="absolute inset-0 bg-white/5 group-hover:bg-transparent transition-colors" />
+        <ul className={cn(
+          "space-y-5",
+          !isMobile && "grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4"
+        )}>
+          {content.map((item, i) => (
+            <li key={i} className="flex items-start gap-4 leading-relaxed" style={{ color: colors.secondaryText }}>
+              <ChevronRight className="w-6 h-6 mt-0.5 shrink-0" style={{ color: colors.gold }} />
+              <span className="text-xl">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      
+      {/* Image Display Area */}
+      <div className={cn(
+        "bg-slate-900/50 p-8 md:p-12 flex items-center justify-center",
+        isMobile ? "md:w-1/2 border-l border-slate-800" : "w-full border-t border-slate-800"
+      )}>
+        <div className={cn(
+          "w-full rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative group bg-black/20",
+          isMobile ? "max-w-[360px] aspect-[9/19]" : "max-w-full"
+        )}>
+          {imageUrl ? (
+            <img 
+              src={imageUrl} 
+              alt={title} 
+              className={cn(
+                "w-full object-contain transition-transform duration-700 group-hover:scale-[1.02]",
+                isMobile ? "h-full" : "h-auto"
+              )}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+              <p className="text-[10px] font-mono uppercase tracking-widest mb-2" style={{ color: colors.gold }}>Screenshot Reference</p>
+              <p className="text-sm font-medium text-slate-500">{imageDesc}</p>
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
         </div>
       </div>
     </div>
@@ -98,7 +136,7 @@ export default function App() {
             {[
               { id: 'pc', label: 'PC 端指引', icon: Monitor },
               { id: 'mobile', label: '手機端指引', icon: Smartphone },
-              { id: 'notes', label: '入金詳解', icon: ShieldCheck },
+              { id: 'notes', label: '憑證上傳(務必執行)', icon: ShieldCheck },
             ].map((tab) => (
               <button 
                 key={tab.id}
@@ -128,24 +166,28 @@ export default function App() {
               title="登錄個人管理後臺"
               content={["訪問官方網址：https://td.pplgm.com/", "輸入您的電子郵件/手機與密碼進行登錄"]}
               imageDesc="PC 登錄介面截圖 (Page 2)"
+              imageUrl="https://www.dropbox.com/scl/fi/x76lbn2ii2qtoypsnacd1/PC.jpeg?rlkey=kg6eo86kxorwxsiy9o4fzwljf&st=0p2g5ua8&dl=1"
             />
             <StepCard 
               number={2}
               title="發起入金申請"
               content={["進入『客戶概觀』", "選擇欲入金的帳戶", "點擊『入金』按鈕，系統將自動跳轉"]}
               imageDesc="客戶概觀與入金按鈕截圖 (Page 2)"
+              imageUrl="https://www.dropbox.com/scl/fi/1cc7r9d0gx9rei1jtzn56/PC.jpeg?rlkey=7e4dzy0qltnfo1roc3r634b05&st=dnvn26wo&dl=1"
             />
             <StepCard 
               number={3}
               title="選擇渠道與金額"
               content={["選擇『USDT Pay』渠道", "填寫入金金額並提交", "※ 最低存款金額依頁面顯示為準"]}
               imageDesc="資金管理 - 入金介面截圖 (Page 3)"
+              imageUrl="https://www.dropbox.com/scl/fi/ng8rdckl9jgem6ececo2o/PC.jpeg?rlkey=3t9c18mfao08hfwelmgqsd9dy&st=i7q175bp&dl=1"
             />
             <StepCard 
               number={4}
               title="核對並提交"
               content={["核對轉入帳戶、帳戶名稱", "確認金額及支付金額無誤後提交"]}
               imageDesc="入金申請核對介面截圖 (Page 3)"
+              imageUrl="https://www.dropbox.com/scl/fi/3fw8d8auf53qaglsd24n4/PC.jpeg?rlkey=mjiv75qefax1if5z5596iz00t&st=cj18j17s&dl=1"
             />
           </div>
         )}
@@ -158,31 +200,39 @@ export default function App() {
               title="登錄行動後臺"
               content={["訪問 https://td.pplgm.com/", "使用電子郵件或手機號碼登錄"]}
               imageDesc="手機登錄介面截圖 (Page 4)"
+              imageUrl="https://www.dropbox.com/scl/fi/67ml3kgnhss2z7q5f8pq6/.jpeg?rlkey=y580tbhmzo7pjq2553m8j3ok0&st=diuum7ho&dl=1"
+              isMobile={true}
             />
             <StepCard 
               number={2}
               title="進入入金流程"
               content={["在『客戶概觀』點擊『入金』", "或從『菜單』-『資金管理』-『入金』進入"]}
               imageDesc="手機版帳戶概覽與菜單截圖 (Page 4)"
+              imageUrl="https://www.dropbox.com/scl/fi/95lqx97jcpa57p6vft8pq/.jpeg?rlkey=1yd0d9ylxxwrbbuwf8zm6gt4t&st=h2t7tk0k&dl=1"
+              isMobile={true}
             />
             <StepCard 
               number={3}
               title="填入金額"
               content={["選擇『USDT Pay』並填寫金額"]}
               imageDesc="手機版入金申請填寫截圖 (Page 4)"
+              imageUrl="https://www.dropbox.com/scl/fi/95lqx97jcpa57p6vft8pq/.jpeg?rlkey=1yd0d9ylxxwrbbuwf8zm6gt4t&st=tzreqrl5&dl=1"
+              isMobile={true}
             />
             <StepCard 
               number={4}
               title="核對並提交"
               content={["核對所有資訊後點擊『提交』"]}
               imageDesc="手機版入金核對與提交截圖 (Page 4)"
+              imageUrl="https://www.dropbox.com/scl/fi/lalsb1wgipoxx7safi11z/.jpeg?rlkey=q2ooslbfh72g0j7h218cg0dnd&st=urvk2jl4&dl=1"
+              isMobile={true}
             />
           </div>
         )}
 
         {activeTab === 'notes' && (
           <div className="animate-in fade-in slide-in-from-bottom-6 duration-700 space-y-16">
-            <SectionHeader title="USDT Pay 入金說明與注意事項" icon={ShieldCheck} />
+            <SectionHeader title="憑證上傳(務必執行)" icon={ShieldCheck} />
             
             {/* Important Notes Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -223,49 +273,65 @@ export default function App() {
               </div>
             </div>
 
-            {/* Final Steps */}
-            <div className="p-10 md:p-16 rounded-[3rem] shadow-2xl border border-slate-800" style={{ backgroundColor: colors.card }}>
-              <h3 className="text-3xl font-bold mb-16 text-center bg-gradient-to-r from-[#F9F1D8] to-[#D4AF37] text-transparent bg-clip-text">最後支付步驟</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-                {[
-                  { 
-                    icon: Copy, 
-                    title: "1. 複製位址", 
-                    desc: "系統生成錢包位址，點選圖示複製或掃描 QR 碼進行支付。",
-                    image: "支付頁面截圖 (Page 6)"
-                  },
-                  { 
-                    icon: UploadCloud, 
-                    title: "2. 上傳憑證", 
-                    desc: "支付成功後，點擊【+】上傳轉帳截圖。截圖需帶有 Hash 值。",
-                    image: "轉帳憑證範例與 Hash 值標示 (Page 6)"
-                  },
-                  { 
-                    icon: CheckCircle2, 
-                    title: "3. 完成轉入", 
-                    desc: "點選『完成轉入』，資金將於 15 分鐘內存入您的帳戶。",
-                    isSuccess: true,
-                    image: "完成轉入按鈕與成功提示"
-                  }
-                ].map((step, i) => (
-                  <div key={i} className="text-center space-y-6 group">
-                    <div className="w-20 h-20 mx-auto rounded-[2rem] flex items-center justify-center transition-all group-hover:scale-110 shadow-xl" 
+            {/* Final Steps - Vertical Layout for better image visibility */}
+            <div className="space-y-12">
+              <h3 className="text-4xl font-black mb-12 text-center bg-gradient-to-r from-[#F9F1D8] via-[#D4AF37] to-[#F9F1D8] text-transparent bg-clip-text">最後支付步驟</h3>
+              
+              {[
+                { 
+                  icon: Copy, 
+                  title: "1. 複製位址", 
+                  desc: "系統生成錢包位址，點選圖示複製或掃描 QR 碼進行支付。",
+                  image: "支付頁面截圖 (Page 6)",
+                  imageUrl: "https://www.dropbox.com/scl/fi/4quiihpgeye0gx94j99cg/.jpeg?rlkey=7fmf8zuef6kjub4lvgkb5tuvr&st=grb0rnkd&dl=1"
+                },
+                { 
+                  icon: UploadCloud, 
+                  title: "2. 上傳憑證", 
+                  desc: "支付成功後，點擊【+】上傳轉帳截圖。截圖需帶有 Hash 值。",
+                  image: "轉帳憑證範例與 Hash 值標示 (Page 6)",
+                  imageUrl: "https://www.dropbox.com/scl/fi/9k4dqp75rikc9is7u6ns5/.jpeg?rlkey=jhu81ypz1xxztdx79gaopjsz2&st=e089inq0&dl=1"
+                },
+                { 
+                  icon: CheckCircle2, 
+                  title: "3. 完成轉入", 
+                  desc: "點選『完成轉入』，資金將於 15 分鐘內存入您的帳戶。",
+                  isSuccess: true,
+                  image: "完成轉入按鈕與成功提示",
+                  imageUrl: "https://www.dropbox.com/scl/fi/8foxx9domp5sgznp0xsv4/Hash.jpeg?rlkey=8918qqzvfpc7n4obc305as0gw&st=x8y7pdj3&dl=1"
+                }
+              ].map((step, i) => (
+                <div key={i} className="rounded-[3rem] border border-slate-800 overflow-hidden shadow-2xl flex flex-col md:flex-row items-stretch" style={{ backgroundColor: colors.card }}>
+                  <div className="p-10 md:p-16 md:w-1/2 flex flex-col justify-center space-y-8">
+                    <div className="w-24 h-24 rounded-[2.5rem] flex items-center justify-center shadow-2xl" 
                          style={{ backgroundColor: colors.bg, border: `1px solid ${step.isSuccess ? colors.usdtGreen : colors.gold}` }}>
-                      <step.icon className="w-10 h-10" style={{ color: step.isSuccess ? colors.usdtGreen : colors.gold }} />
+                      <step.icon className="w-12 h-12" style={{ color: step.isSuccess ? colors.usdtGreen : colors.gold }} />
                     </div>
-                    <h4 className="text-xl font-bold text-white">{step.title}</h4>
-                    <p className="text-sm leading-relaxed mb-6" style={{ color: colors.secondaryText }}>{step.desc}</p>
-                    
-                    {/* 1 Image for each step */}
-                    <div className="mt-6">
-                      <div className="bg-slate-900/80 rounded-xl p-6 border border-slate-800 flex flex-col items-center justify-center min-h-[150px]">
-                        <p className="text-[10px] font-mono uppercase tracking-widest mb-2" style={{ color: colors.gold }}>Screenshot Reference</p>
-                        <p className="text-sm text-slate-400">{step.image}</p>
-                      </div>
+                    <div className="space-y-4">
+                      <h4 className="text-3xl font-bold text-white">{step.title}</h4>
+                      <p className="text-xl leading-relaxed" style={{ color: colors.secondaryText }}>{step.desc}</p>
                     </div>
                   </div>
-                ))}
-              </div>
+                  
+                  <div className="md:w-1/2 bg-slate-900/50 p-8 flex items-center justify-center border-l border-slate-800">
+                    <div className="w-full max-w-[400px] min-h-[300px] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl relative group bg-black/20">
+                      {step.imageUrl ? (
+                        <img 
+                          src={step.imageUrl} 
+                          alt={step.title} 
+                          className="w-full h-auto max-h-[600px] object-contain transition-transform duration-700 group-hover:scale-105"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                          <p className="text-[10px] font-mono uppercase tracking-widest mb-2" style={{ color: colors.gold }}>Screenshot Reference</p>
+                          <p className="text-sm font-medium text-slate-500">{step.image}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -275,8 +341,13 @@ export default function App() {
       <footer className="py-16 px-4 border-t border-slate-800" style={{ backgroundColor: colors.card }}>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl" style={{ backgroundColor: colors.gold }}>
-              <span className="text-slate-900 font-black text-lg">PPLI</span>
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl overflow-hidden bg-white">
+              <img 
+                src="https://www.dropbox.com/scl/fi/1lg91xa98mrfe7hghs8t1/Logo.png?rlkey=332lexpb0cg3edsgckdaad1j5&st=h2ki8s1a&dl=1" 
+                alt="合境 Logo" 
+                className="w-full h-full object-contain p-1"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
               <span className="font-bold text-xl tracking-tight text-white block">USDT 渠道說明手冊</span>
@@ -289,7 +360,7 @@ export default function App() {
             <a href="#" className="hover:text-white transition-colors" style={{ color: colors.secondaryText }}>聯繫客服</a>
           </div>
           <p className="text-xs font-mono" style={{ color: colors.secondaryText }}>
-            © {new Date().getFullYear()} PPL International. All rights reserved.
+            © {new Date().getFullYear()} 合境. All rights reserved.
           </p>
         </div>
       </footer>
