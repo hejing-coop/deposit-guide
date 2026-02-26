@@ -112,6 +112,12 @@ export default function App() {
     </div>
   );
 
+  const tabs = [
+    { id: 'pc', label: 'PC 端指引', icon: Monitor },
+    { id: 'mobile', label: '手機端指引', icon: Smartphone },
+    { id: 'notes', label: '憑證上傳(務必執行)', icon: ShieldCheck },
+  ] as const;
+
   return (
     <div className="min-h-screen font-sans text-slate-200" style={{ backgroundColor: colors.bg }}>
       {/* Hero Section */}
@@ -133,11 +139,7 @@ export default function App() {
           </p>
           
           <div className="flex flex-wrap justify-center gap-5">
-            {[
-              { id: 'pc', label: 'PC 端指引', icon: Monitor },
-              { id: 'mobile', label: '手機端指引', icon: Smartphone },
-              { id: 'notes', label: '憑證上傳(務必執行)', icon: ShieldCheck },
-            ].map((tab) => (
+            {tabs.map((tab) => (
               <button 
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -335,6 +337,29 @@ export default function App() {
             </div>
           </div>
         )}
+        {/* Bottom Navigation CTA */}
+        <div className="max-w-4xl mx-auto px-4 py-20 text-center border-t border-slate-800/50">
+          <div className="flex flex-wrap justify-center gap-4">
+            {tabs.map((tab) => (
+              <button 
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={cn(
+                  "px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 border",
+                  activeTab === tab.id 
+                    ? "bg-slate-800 border-slate-700 text-white shadow-lg" 
+                    : "bg-transparent border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white"
+                )}
+              >
+                <tab.icon className="w-4 h-4" style={{ color: activeTab === tab.id ? colors.gold : 'inherit' }} />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </main>
 
       {/* Footer */}
